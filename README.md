@@ -27,9 +27,13 @@ It can do a lot of cool things, some of them being:
 - Can take screenshot and save it with custom filename
 - Can tell jokes
 
+**And as of 2.0, a Claude-powered agent that can operate the whole machine —
+files, shell, screen, apps and system — from a plain-language request.
+See [Jarvis 2.0](#-jarvis-20--the-ai-assistant-that-actually-operates-your-device).**
+
 ## Requirements
 
-Python 3.6+
+Python 3.6+ for the original script, Python 3.10+ for the Claude-powered assistant.
 
 ## 📌Installation
 
@@ -78,6 +82,139 @@ Python 3.6+
      ```bash
      deactivate
      ```
+
+---
+
+## 🤖 Jarvis 2.0 — the AI assistant that actually operates your device
+
+The original `Jarvis/jarvis.py` matches keywords with an `if/elif` chain: it knows
+`"open youtube"` and nothing else. `jarvis_ai/` replaces that with a **Claude-powered
+agent**. You describe what you want in your own words, Claude picks and chains the
+right device tools, and every action that changes your machine has to be approved
+by you first.
+
+```
+you  find the invoice PDFs I downloaded last month and move them into ~/Documents/Invoices
+
+  → find_files: search for files matching '*.pdf' under ~/Downloads
+    12 matches for '*.pdf':
+  → create_directory: create the directory ~/Documents/Invoices
+
+  Jarvis wants to move ~/Downloads/invoice-april.pdf to ~/Documents/Invoices
+  tool: move_path · modifies your machine
+  Allow? [y/N] y
+
+jarvis  Moved four invoices into Documents/Invoices. The other eight PDFs were
+        receipts, so I left them where they were.
+```
+
+### What it can do
+
+| Area | Tools |
+|---|---|
+| **Files** | list, read, write, find by name, search inside, copy, move, delete, inspect |
+| **Shell** | run any command, start background processes, check what's installed |
+| **System** | hardware and resource stats, processes, kill, network, shut down / restart / sleep / lock |
+| **Screen** | take a screenshot **and look at it** — Claude reads your error dialogs |
+| **Input** | type text, press keyboard shortcuts, control media keys and volume |
+| **Apps** | launch applications, open files and folders, open websites, play music |
+| **Clipboard** | read and write |
+| **Web** | search the web (server-side, via Claude) |
+| **Memory** | remember facts across sessions, take and read notes |
+
+Anything not on that list still works through `run_command` — that is what makes
+"does everything" literal rather than aspirational.
+
+### Setup
+
+```bash
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-ant-...        # or run: ant auth login
+python -m jarvis_ai
+```
+
+```bash
+python -m jarvis_ai "how much disk space is left?"   # one-shot, then exit
+python -m jarvis_ai --voice                          # talk to it instead of typing
+python -m jarvis_ai --dry-run                        # show actions without doing them
+```
+
+Get an API key at [console.anthropic.com](https://console.anthropic.com/).
+Python 3.10 or newer.
+
+### Safety — read this part
+
+The assistant can run shell commands on your machine, so it is built to fail
+closed rather than fail fast:
+
+- **Every action is rated.** Reads (`list_directory`, `system_info`) run freely.
+  Writes (`write_file`, `launch_app`) and system-level actions (`run_command`,
+  `delete_path`, `power_action`) stop and ask, showing you a plain-English
+  description of what is about to happen.
+- **Writes are fenced.** Nothing outside your home directory can be modified.
+  Widen or narrow it with `--writable-root ~/projects`.
+- **Credential files are guarded.** Reading anything matching `~/.ssh/*`,
+  `.aws/credentials`, `*.env`, `*.pem` and friends needs explicit confirmation,
+  even though reads are otherwise unrestricted.
+- **Deletes go to the trash** when `send2trash` is installed.
+- **A denial is final.** Claude is instructed to accept "no" and offer an
+  alternative, never to retry the same action through a different tool.
+
+| Flag | Effect |
+|---|---|
+| *(default)* | Ask before anything that changes the machine |
+| `--dry-run` | Describe every action instead of performing it |
+| `--read-only` | Refuse changes outright, without prompting |
+| `--policy auto-edit` | Auto-approve file writes and app launches; still ask for shell, deletes and power |
+| `--yolo` | Approve everything. Only sensible in a throwaway VM. |
+
+### Configuration
+
+| Variable | Purpose |
+|---|---|
+| `ANTHROPIC_API_KEY` | Your Claude API key |
+| `JARVIS_MODEL` | Model to use (default `claude-opus-5`) |
+| `JARVIS_EFFORT` | `low` … `max` — how hard Claude thinks before acting |
+| `JARVIS_WRITABLE_ROOTS` | Path-separated list of directories it may modify |
+| `JARVIS_DATA_DIR` | Where notes, memory and screenshots live (default `~/.jarvis`) |
+| `JARVIS_COMMAND_TIMEOUT` | Seconds before a shell command is killed |
+| `JARVIS_VOICE_INPUT` / `JARVIS_VOICE_OUTPUT` | Turn speech on or off |
+
+### Adding a tool
+
+Every capability is a decorated function. The JSON schema Claude sees is derived
+from the signature, and the risk level decides whether it needs approval:
+
+```python
+@tool(
+    risk=Risk.WRITE,
+    description="Set the desktop wallpaper to an image file.",
+    params={"path": "Image to use as the wallpaper."},
+    preview=lambda path: f"set the wallpaper to {path}",
+)
+def set_wallpaper(ctx: ToolContext, path: str) -> str:
+    ...
+    return "Wallpaper changed."
+```
+
+Drop it in `jarvis_ai/tools/`, import it from `jarvis_ai/tools/__init__.py`, and
+Claude can use it on the next run.
+
+### Tests
+
+```bash
+python -m unittest discover tests
+```
+
+The suite covers the approval gate, the writable-root guard, tool dispatch, and
+the agent loop (driven by a stubbed client, so it runs without an API key).
+
+### The original script
+
+`Jarvis/jarvis.py` is untouched and still works — it is a good, dependency-light
+introduction to the idea. `jarvis_ai/` is where the intelligence lives.
+
+---
 
 ## 📌Contributing
 
