@@ -1,5 +1,19 @@
+# ---- Claude-powered assistant (jarvis_ai) --------------------------------
+anthropic>=1.3.0
+
+# ---- Device control ------------------------------------------------------
+# Each of these is optional: the tools that need one report a clear message
+# and the rest of the assistant keeps working without it.
+psutil>=5.9            # processes, memory, disk, battery
+PyAutoGUI~=0.9.54      # screenshots, keyboard and mouse control
+pyperclip>=1.8         # clipboard read/write
+send2trash>=1.8        # delete to the trash instead of permanently
+
+# ---- Voice (optional) ----------------------------------------------------
+# Speech input also needs PyAudio — see the README for platform instructions.
 pyttsx3~=2.90
-wikipedia~=1.4.0
-PyAutoGUI~=0.9.54
 SpeechRecognition~=3.10.4
+
+# ---- Used by the original Jarvis/jarvis.py script ------------------------
+wikipedia~=1.4.0
 pyjokes==0.6.0
