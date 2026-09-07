@@ -27,6 +27,41 @@ It can do a lot of cool things, some of them being:
 - Can take screenshot and save it with custom filename
 - Can tell jokes
 
+## 📌Read Aloud (Text-to-Speech App)
+
+Along with the voice assistant, this repository ships a standalone app that reads
+any text out loud: `Jarvis/read_aloud.py`. It uses the same offline `pyttsx3`
+engine, so no internet connection or API key is needed.
+
+**Desktop window**
+
+```bash
+python Jarvis/read_aloud.py
+```
+
+- Type or paste text, or open a `.txt`/`.md`/`.csv`/`.log` file
+- Speak, Pause/Resume and Stop, with the sentence being read highlighted live
+- Pick a voice, and adjust speed (80 to 320 wpm) and volume
+- Save the spoken text to a WAV file
+- Shortcuts: `Ctrl+Enter` speak, `Ctrl+Space` pause/resume, `Esc` stop, `Ctrl+O` open file
+
+**Command line**
+
+```bash
+python Jarvis/read_aloud.py --text "Hello, this is read out loud."
+python Jarvis/read_aloud.py --file notes.txt --no-gui --rate 190 --voice 1
+cat article.txt | python Jarvis/read_aloud.py            # reads piped input
+python Jarvis/read_aloud.py --file notes.txt --save notes.wav
+python Jarvis/read_aloud.py --list-voices
+```
+
+Options: `--text`, `--file`, `--stdin`, `--save PATH`, `--voice`, `--list-voices`,
+`--rate`, `--volume`, `--gui`, `--no-gui`, `--verbose`.
+
+The window needs `tkinter` (bundled with Python on Windows and macOS; on Debian or
+Ubuntu install it with `sudo apt install python3-tk`). Without it, the app falls
+back to command line mode automatically.
+
 ## Requirements
 
 Python 3.6+
