@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Read Aloud</title>
+<meta name="description" content="Reads text out loud on your phone, using the voices already installed on the device.">
+<meta name="theme-color" content="#11131a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Read Aloud">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Read Aloud</h1>
+  <button id="settingsToggle" class="icon-btn" aria-expanded="false" aria-controls="settings">Voice</button>
+</header>
+
+<section id="settings" class="settings" hidden>
+  <label class="field">
+    <span>Voice</span>
+    <select id="voice"></select>
+  </label>
+  <label class="field">
+    <span>Speed <output id="rateOut">1.0x</output></span>
+    <input id="rate" type="range" min="0.5" max="2.5" step="0.1" value="1">
+  </label>
+  <label class="field">
+    <span>Pitch <output id="pitchOut">1.0</output></span>
+    <input id="pitch" type="range" min="0.5" max="1.5" step="0.1" value="1">
+  </label>
+  <label class="field">
+    <span>Volume <output id="volumeOut">100%</output></span>
+    <input id="volume" type="range" min="0" max="1" step="0.05" value="1">
+  </label>
+</section>
+
+<main>
+  <textarea id="text" placeholder="Paste or type anything here, then press Play." spellcheck="false" autocapitalize="sentences"></textarea>
+
+  <div id="reader" class="reader" hidden aria-live="polite"></div>
+
+  <p id="status" class="status" role="status">Ready.</p>
+</main>
+
+<nav class="controls">
+  <button id="play" class="primary">Play</button>
+  <button id="pause" disabled>Pause</button>
+  <button id="stop" disabled>Stop</button>
+  <button id="openFile">File</button>
+  <button id="clear">Clear</button>
+  <input id="fileInput" type="file" accept=".txt,.md,.csv,.log,.json,text/plain" hidden>
+</nav>
+
+<div id="installBar" class="install" hidden>
+  <span id="installText">Install this as an app on your phone.</span>
+  <button id="install" hidden>Install</button>
+  <button id="installDismiss" class="ghost">Dismiss</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
